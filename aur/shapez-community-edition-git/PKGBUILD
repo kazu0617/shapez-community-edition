@@ -1,0 +1,75 @@
+# Maintainer: kazu0617 <archlinux at kazu0617 dot net>
+pkgname=shapez-community-edition-git
+pkgver=r1
+pkgrel=1
+pkgdesc="Community-maintained fork of shapez.io, an open-source factory-building game (git master)"
+arch=('x86_64' 'aarch64')
+url="https://github.com/kazu0617/shapez-community-edition"
+license=('GPL-3.0-or-later')
+provides=('shapez-community-edition')
+conflicts=('shapez-community-edition' 'shapez-community-edition-bin')
+depends=('gtk3' 'nss' 'alsa-lib' 'libxtst' 'libxss' 'hicolor-icon-theme')
+makedepends=('nodejs' 'npm' 'java-runtime' 'ffmpeg' 'git')
+source=(
+    "shapez-community-edition::git+https://github.com/kazu0617/shapez-community-edition.git"
+    "${pkgname}.desktop"
+    "${pkgname}.sh"
+)
+sha256sums=(
+    'SKIP'
+    'SKIP'
+    'SKIP'
+)
+
+pkgver() {
+    cd "shapez-community-edition"
+    git describe --long --tags --abbrev=7 2>/dev/null \
+        | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g' \
+        || printf "r%s.g%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
+}
+
+build() {
+    cd "shapez-community-edition"
+
+    export npm_config_cache="${srcdir}/npm-cache"
+    npm ci
+
+    case "${CARCH}" in
+        x86_64)  npm run package-linux-x64 ;;
+        aarch64) npm run package-linux-arm64 ;;
+    esac
+}
+
+package() {
+    cd "shapez-community-edition"
+
+    local _arch
+    case "${CARCH}" in
+        x86_64)  _arch="x64" ;;
+        aarch64) _arch="arm64" ;;
+    esac
+
+    # Install application files
+    install -dm755 "${pkgdir}/opt/shapez-community-edition"
+    cp -r "build_output/standalone/shapez-linux-${_arch}/." "${pkgdir}/opt/shapez-community-edition/"
+
+    # Fix permissions
+    find "${pkgdir}/opt/shapez-community-edition" -type f -exec chmod a-s {} \;
+    chmod 755 "${pkgdir}/opt/shapez-community-edition/shapezio"
+
+    # Install launcher script
+    install -Dm755 "../${pkgname}.sh" "${pkgdir}/usr/bin/shapez-community-edition"
+
+    # Install desktop entry
+    install -Dm644 "../${pkgname}.desktop" \
+        "${pkgdir}/usr/share/applications/shapez-community-edition.desktop"
+
+    # Install icon
+    install -Dm644 "electron/favicon.png" \
+        "${pkgdir}/usr/share/icons/hicolor/256x256/apps/shapez-community-edition.png"
+    install -Dm644 "electron/favicon.png" \
+        "${pkgdir}/usr/share/pixmaps/shapez-community-edition.png"
+
+    # License
+    install -Dm644 "LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

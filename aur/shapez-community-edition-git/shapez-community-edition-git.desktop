@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=shapez Community Edition (git)
+GenericName=Factory Building Game
+Comment=Community-maintained fork of shapez.io, an open-source factory-building game
+Exec=shapez-community-edition
+Icon=shapez-community-edition
+Type=Application
+Categories=Game;LogicGame;
+Keywords=shapez;factory;puzzle;building;automation;
+StartupNotify=true
+StartupWMClass=shapez

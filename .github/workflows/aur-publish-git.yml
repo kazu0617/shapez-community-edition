@@ -1,0 +1,32 @@
+name: Publish shapez-community-edition-git to AUR
+
+on:
+    push:
+        branches:
+            - master
+        paths:
+            - 'aur/shapez-community-edition-git/**'
+    workflow_dispatch:
+
+jobs:
+    publish-git:
+        name: Publish shapez-community-edition-git to AUR
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Publish to AUR
+              uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
+              with:
+                  pkgname: shapez-community-edition-git
+                  pkgbuild: ./aur/shapez-community-edition-git/PKGBUILD
+                  commit_username: ${{ vars.AUR_COMMIT_USERNAME }}
+                  commit_email: ${{ vars.AUR_COMMIT_EMAIL }}
+                  ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+                  commit_message: "update: shapez-community-edition-git PKGBUILD"
+                  allow_empty_commits: false
+                  assets: |
+                      ./aur/shapez-community-edition-git/shapez-community-edition-git.desktop
+                      ./aur/shapez-community-edition-git/shapez-community-edition-git.sh
