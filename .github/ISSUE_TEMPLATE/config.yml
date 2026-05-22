@@ -1,0 +1,10 @@
+blank_issues_enabled: false
+contact_links:
+    - name: 💬 Discord (推奨 / Recommended)
+      url: https://discord.com/invite/HN7EVzV
+      about: |
+          新機能の提案や開発に関する議論は Discord の #contributing チャンネルへ。
+          For feature discussions and development talk, join #contributing on Discord.
+    - name: 🛒 Steam ストアページ / Steam Store Page
+      url: https://store.steampowered.com/app/1318690/shapez/
+      about: 公式 shapez ストアページ / Official shapez store page

@@ -1,0 +1,121 @@
+name: Publish to AUR
+
+on:
+    release:
+        types: [published]
+
+jobs:
+    publish-source:
+        name: Publish shapez-community-edition (source) to AUR
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Update pkgver in PKGBUILD
+              working-directory: aur/shapez-community-edition
+              run: |
+                  VERSION="${{ github.event.release.tag_name }}"
+                  VERSION="${VERSION#v}"
+                  sed -i "s/^pkgver=.*/pkgver=${VERSION}/" PKGBUILD
+                  sed -i "s/^pkgrel=.*/pkgrel=1/" PKGBUILD
+
+            - name: Update pkgver in .SRCINFO
+              working-directory: aur/shapez-community-edition
+              run: |
+                  VERSION="${{ github.event.release.tag_name }}"
+                  VERSION="${VERSION#v}"
+                  sed -i "s/pkgver = .*/pkgver = ${VERSION}/" .SRCINFO
+                  sed -i "s/pkgrel = .*/pkgrel = 1/" .SRCINFO
+                  # Update source URLs containing version
+                  sed -i "s|/v[0-9]\+\.[0-9]\+\.[0-9]\+\.tar\.gz|/v${VERSION}.tar.gz|g" .SRCINFO
+                  sed -i "s|shapez-community-edition-[0-9]\+\.[0-9]\+\.[0-9]\+\.tar\.gz|shapez-community-edition-${VERSION}.tar.gz|g" .SRCINFO
+
+            - name: Publish shapez-community-edition to AUR
+              uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
+              with:
+                  pkgname: shapez-community-edition
+                  pkgbuild: ./aur/shapez-community-edition/PKGBUILD
+                  commit_username: kazu0617
+                  commit_email: kazuyagi19990617@gmail.com
+                  ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+                  commit_message: "upgpkg: shapez-community-edition ${{ github.event.release.tag_name }}"
+                  allow_empty_commits: false
+                  updpkgsums: true
+                  assets: |
+                      ./aur/shapez-community-edition/shapez-community-edition.desktop
+                      ./aur/shapez-community-edition/shapez-community-edition.sh
+
+    publish-bin:
+        name: Publish shapez-community-edition-bin to AUR
+        runs-on: ubuntu-latest
+        needs: publish-source
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Get release asset checksums
+              id: checksums
+              run: |
+                  VERSION="${{ github.event.release.tag_name }}"
+                  VERSION="${VERSION#v}"
+
+                  X64_URL="https://github.com/kazu0617/shapez-community-edition/releases/download/${{ github.event.release.tag_name }}/shapez-linux-x64-${{ github.event.release.tag_name }}.tar.gz"
+                  ARM64_URL="https://github.com/kazu0617/shapez-community-edition/releases/download/${{ github.event.release.tag_name }}/shapez-linux-arm64-${{ github.event.release.tag_name }}.tar.gz"
+
+                  X64_SUM=$(curl -sL "${X64_URL}" | sha256sum | awk '{print $1}')
+                  ARM64_SUM=$(curl -sL "${ARM64_URL}" | sha256sum | awk '{print $1}')
+
+                  echo "x64_sum=${X64_SUM}" >> "$GITHUB_OUTPUT"
+                  echo "arm64_sum=${ARM64_SUM}" >> "$GITHUB_OUTPUT"
+
+            - name: Update pkgver and checksums in PKGBUILD
+              working-directory: aur/shapez-community-edition-bin
+              run: |
+                  VERSION="${{ github.event.release.tag_name }}"
+                  VERSION="${VERSION#v}"
+                  TAG="${{ github.event.release.tag_name }}"
+
+                  sed -i "s/^pkgver=.*/pkgver=${VERSION}/" PKGBUILD
+                  sed -i "s/^pkgrel=.*/pkgrel=1/" PKGBUILD
+
+                  # Update version in source URLs
+                  sed -i "s|v[0-9]\+\.[0-9]\+\.[0-9]\+\.tar\.gz|${TAG}.tar.gz|g" PKGBUILD
+                  sed -i "s|shapez-linux-x64-v[0-9.]*\.tar\.gz|shapez-linux-x64-${TAG}.tar.gz|g" PKGBUILD
+                  sed -i "s|shapez-linux-arm64-v[0-9.]*\.tar\.gz|shapez-linux-arm64-${TAG}.tar.gz|g" PKGBUILD
+                  sed -i "s|/v[0-9]\+\.[0-9]\+\.[0-9]\+/|/${TAG}/|g" PKGBUILD
+
+                  # Update checksums
+                  sed -i "s/^sha256sums_x86_64=.*/sha256sums_x86_64=('${{ steps.checksums.outputs.x64_sum }}')/" PKGBUILD
+                  sed -i "s/^sha256sums_aarch64=.*/sha256sums_aarch64=('${{ steps.checksums.outputs.arm64_sum }}')/" PKGBUILD
+
+            - name: Update pkgver in .SRCINFO
+              working-directory: aur/shapez-community-edition-bin
+              run: |
+                  VERSION="${{ github.event.release.tag_name }}"
+                  VERSION="${VERSION#v}"
+                  TAG="${{ github.event.release.tag_name }}"
+
+                  sed -i "s/pkgver = .*/pkgver = ${VERSION}/" .SRCINFO
+                  sed -i "s/pkgrel = .*/pkgrel = 1/" .SRCINFO
+                  sed -i "s|provides = shapez-community-edition=.*|provides = shapez-community-edition=${VERSION}|" .SRCINFO
+                  sed -i "s|/v[0-9]\+\.[0-9]\+\.[0-9]\+/|/${TAG}/|g" .SRCINFO
+                  sed -i "s|v[0-9]\+\.[0-9]\+\.[0-9]\+\.tar\.gz|${TAG}.tar.gz|g" .SRCINFO
+                  sed -i "s/sha256sums_x86_64 = .*/sha256sums_x86_64 = ${{ steps.checksums.outputs.x64_sum }}/" .SRCINFO
+                  sed -i "s/sha256sums_aarch64 = .*/sha256sums_aarch64 = ${{ steps.checksums.outputs.arm64_sum }}/" .SRCINFO
+
+            - name: Publish shapez-community-edition-bin to AUR
+              uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
+              with:
+                  pkgname: shapez-community-edition-bin
+                  pkgbuild: ./aur/shapez-community-edition-bin/PKGBUILD
+                  commit_username: kazu0617
+                  commit_email: kazuyagi19990617@gmail.com
+                  ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+                  commit_message: "upgpkg: shapez-community-edition-bin ${{ github.event.release.tag_name }}"
+                  allow_empty_commits: false
+                  assets: |
+                      ./aur/shapez-community-edition-bin/shapez-community-edition-bin.desktop
+                      ./aur/shapez-community-edition-bin/shapez-community-edition-bin.sh

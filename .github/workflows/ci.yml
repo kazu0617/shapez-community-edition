@@ -15,8 +15,54 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repo
-              uses: actions/checkout@v2
+              uses: actions/checkout@v4
             - name: YAML Lint
-              uses: ibiqlik/action-yamllint@v1.0.0
+              uses: ibiqlik/action-yamllint@v3
               with:
                   file_or_dir: translations/*.yaml
+
+    lint:
+        name: ESLint
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '22'
+                  cache: 'npm'
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Run ESLint
+              run: npm run lint
+
+    typecheck:
+        name: TypeScript type check
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '22'
+                  cache: 'npm'
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Install Electron TypeScript dependencies
+              working-directory: electron
+              run: npm ci
+
+            - name: Type check (root)
+              run: npx tsc --noEmit
+
+            - name: Type check (electron)
+              working-directory: electron
+              run: npx tsc --noEmit

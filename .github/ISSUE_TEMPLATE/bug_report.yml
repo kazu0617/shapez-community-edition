@@ -1,0 +1,105 @@
+name: バグ報告 / Bug Report
+description: 不具合や予期しない動作を報告する / Report a bug or unexpected behavior
+labels: ["bug"]
+body:
+    - type: markdown
+      attributes:
+          value: |
+              バグ報告ありがとうございます。できるだけ詳しく情報をご記入ください。
+              Thanks for reporting a bug! Please fill in as much detail as possible.
+
+              > [!TIP]
+              > **Discord でも報告できます:** [公式 Discord サーバー](https://discord.com/invite/HN7EVzV) の `#contributing` チャンネルへどうぞ。
+              > **You can also report on Discord:** Join the `#contributing` channel on the [official Discord server](https://discord.com/invite/HN7EVzV).
+
+    - type: input
+      id: version
+      attributes:
+          label: バージョン / Version
+          description: shapez CE のバージョン (例: v1.6.0) / shapez CE version (e.g. v1.6.0)
+          placeholder: v1.6.0
+      validations:
+          required: true
+
+    - type: dropdown
+      id: platform
+      attributes:
+          label: プラットフォーム / Platform
+          description: バグが発生した OS / OS where the bug occurs
+          options:
+              - Linux (x86_64)
+              - Linux (aarch64)
+              - Windows (x64)
+              - Windows (arm64)
+              - macOS (x64 / Intel)
+              - macOS (arm64 / Apple Silicon)
+      validations:
+          required: true
+
+    - type: textarea
+      id: description
+      attributes:
+          label: バグの説明 / Bug Description
+          description: 何が起きたか、具体的に説明してください / Please describe specifically what happened
+          placeholder: |
+              例: ○○の操作をすると、△△が発生してゲームがクラッシュします。
+              Example: When I do X, Y happens and the game crashes.
+      validations:
+          required: true
+
+    - type: textarea
+      id: steps
+      attributes:
+          label: 再現手順 / Steps to Reproduce
+          description: バグを再現するための手順 / Steps to reproduce the bug
+          placeholder: |
+              1. ゲームを起動する / Start the game
+              2. ○○を開く / Open ...
+              3. △△をクリックする / Click ...
+              4. バグが発生 / Bug occurs
+      validations:
+          required: true
+
+    - type: textarea
+      id: expected
+      attributes:
+          label: 期待する動作 / Expected Behavior
+          description: 本来どう動くべきか / What should happen instead
+      validations:
+          required: true
+
+    - type: textarea
+      id: actual
+      attributes:
+          label: 実際の動作 / Actual Behavior
+          description: 実際に何が起きたか / What actually happened
+      validations:
+          required: true
+
+    - type: textarea
+      id: screenshots
+      attributes:
+          label: スクリーンショット・ログ / Screenshots & Logs
+          description: |
+              スクリーンショットやコンソールログがあれば貼り付けてください。
+              Attach screenshots or console logs if available.
+          placeholder: ここに画像をドラッグ&ドロップ / Drag & drop images here
+
+    - type: textarea
+      id: mods
+      attributes:
+          label: 使用中の Mod / Active Mods
+          description: Mod を使用している場合はその名前とバージョンを記入してください / List any active mods and their versions
+          placeholder: |
+              - ModName v1.0.0
+              - ...
+
+    - type: checkboxes
+      id: checklist
+      attributes:
+          label: 確認事項 / Checklist
+          options:
+              - label: 既存の Issue を検索し、重複がないことを確認した / I have searched for existing issues and confirmed this is not a duplicate
+                required: true
+              - label: 最新バージョンで再現することを確認した / I have confirmed this bug reproduces on the latest version
+                required: true

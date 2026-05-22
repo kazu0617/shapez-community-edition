@@ -1,0 +1,74 @@
+name: 機能要望 / Feature Request
+description: 新機能や改善提案を送る / Suggest a new feature or improvement
+labels: ["enhancement"]
+body:
+    - type: markdown
+      attributes:
+          value: |
+              機能要望をありがとうございます！
+              Thanks for your feature request!
+
+              > [!IMPORTANT]
+              > 大きな変更や新機能を提案する前に、[公式 Discord サーバー](https://discord.com/invite/HN7EVzV) の `#contributing` チャンネルでコミュニティと議論することを強くおすすめします。
+              > Before proposing significant changes, we strongly recommend discussing them in the `#contributing` channel on the [official Discord server](https://discord.com/invite/HN7EVzV).
+
+    - type: textarea
+      id: problem
+      attributes:
+          label: 解決したい問題 / Problem to Solve
+          description: |
+              この機能要望は何らかの問題に基づいていますか？説明してください。
+              Is your feature request related to a problem? Please describe it.
+          placeholder: |
+              例: ○○のときに△△ができなくて不便です。
+              Example: I always get frustrated when ...
+      validations:
+          required: true
+
+    - type: textarea
+      id: solution
+      attributes:
+          label: 提案する解決策 / Proposed Solution
+          description: |
+              どのような機能・変更を望みますか？できるだけ具体的に説明してください。
+              What feature or change would you like? Please be as specific as possible.
+      validations:
+          required: true
+
+    - type: textarea
+      id: alternatives
+      attributes:
+          label: 検討した代替案 / Alternatives Considered
+          description: |
+              他に検討した方法やアプローチがあれば記載してください。
+              Describe any alternative solutions or features you've considered.
+
+    - type: dropdown
+      id: scope
+      attributes:
+          label: 変更の規模 / Scope of Change
+          description: この変更はどのくらいの規模ですか？ / How large is this change?
+          options:
+              - 小 (UI調整・バグに近い修正など) / Small (UI tweak, near-bugfix)
+              - 中 (既存機能の拡張) / Medium (extend existing feature)
+              - 大 (新システム・大規模リファクタ) / Large (new system, large refactor)
+      validations:
+          required: true
+
+    - type: textarea
+      id: context
+      attributes:
+          label: 追加情報 / Additional Context
+          description: |
+              スクリーンショット、参考リンク、その他補足情報があれば貼り付けてください。
+              Add any other context, screenshots, or reference links here.
+
+    - type: checkboxes
+      id: checklist
+      attributes:
+          label: 確認事項 / Checklist
+          options:
+              - label: 既存の Issue・PR を検索し、類似の提案がないことを確認した / I have searched existing issues and PRs for similar proposals
+                required: true
+              - label: Discord で事前に議論した、または今後議論する予定がある / I have discussed or plan to discuss this on Discord
+                required: false

@@ -1,0 +1,62 @@
+# Maintainer: kazu0617 <kazuyagi19990617@gmail.com>
+pkgname=shapez-community-edition-bin
+pkgver=1.6.0
+pkgrel=1
+pkgdesc="Community-maintained fork of shapez.io, an open-source factory-building game (pre-built binary)"
+arch=('x86_64' 'aarch64')
+url="https://github.com/kazu0617/shapez-community-edition"
+license=('GPL-3.0-or-later')
+provides=("shapez-community-edition=${pkgver}")
+conflicts=('shapez-community-edition')
+depends=('gtk3' 'nss' 'alsa-lib' 'libxtst' 'libxss' 'hicolor-icon-theme')
+source=(
+    "${pkgname}.desktop"
+    "${pkgname}.sh"
+    "favicon.png::https://raw.githubusercontent.com/kazu0617/shapez-community-edition/v${pkgver}/electron/favicon.png"
+)
+source_x86_64=(
+    "shapez-linux-x64-v${pkgver}.tar.gz::https://github.com/kazu0617/shapez-community-edition/releases/download/v${pkgver}/shapez-linux-x64-v${pkgver}.tar.gz"
+)
+source_aarch64=(
+    "shapez-linux-arm64-v${pkgver}.tar.gz::https://github.com/kazu0617/shapez-community-edition/releases/download/v${pkgver}/shapez-linux-arm64-v${pkgver}.tar.gz"
+)
+sha256sums=(
+    'SKIP'
+    'SKIP'
+    'SKIP'
+)
+sha256sums_x86_64=('SKIP')
+sha256sums_aarch64=('SKIP')
+
+package() {
+    local _arch
+    case "${CARCH}" in
+        x86_64)  _arch="x64" ;;
+        aarch64) _arch="arm64" ;;
+    esac
+
+    # Install application files
+    install -dm755 "${pkgdir}/opt/shapez-community-edition"
+    cp -r "shapez-linux-${_arch}/." "${pkgdir}/opt/shapez-community-edition/"
+
+    # Fix permissions
+    find "${pkgdir}/opt/shapez-community-edition" -type f -exec chmod a-s {} \;
+    chmod 755 "${pkgdir}/opt/shapez-community-edition/shapezio"
+
+    # Install launcher script
+    install -Dm755 "${pkgname}.sh" "${pkgdir}/usr/bin/shapez-community-edition"
+
+    # Install desktop entry
+    install -Dm644 "${pkgname}.desktop" \
+        "${pkgdir}/usr/share/applications/shapez-community-edition.desktop"
+
+    # Install icon
+    install -Dm644 "favicon.png" \
+        "${pkgdir}/usr/share/icons/hicolor/256x256/apps/shapez-community-edition.png"
+    install -Dm644 "favicon.png" \
+        "${pkgdir}/usr/share/pixmaps/shapez-community-edition.png"
+
+    # License
+    install -Dm644 "${pkgdir}/opt/shapez-community-edition/LICENSE" \
+        "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

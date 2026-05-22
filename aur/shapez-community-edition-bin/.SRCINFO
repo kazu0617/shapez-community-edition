@@ -1,0 +1,28 @@
+pkgbase = shapez-community-edition-bin
+	pkgdesc = Community-maintained fork of shapez.io, an open-source factory-building game (pre-built binary)
+	pkgver = 1.6.0
+	pkgrel = 1
+	url = https://github.com/kazu0617/shapez-community-edition
+	arch = x86_64
+	arch = aarch64
+	license = GPL-3.0-or-later
+	provides = shapez-community-edition=1.6.0
+	conflicts = shapez-community-edition
+	depends = gtk3
+	depends = nss
+	depends = alsa-lib
+	depends = libxtst
+	depends = libxss
+	depends = hicolor-icon-theme
+	source = shapez-community-edition-bin.desktop
+	source = shapez-community-edition-bin.sh
+	source = favicon.png::https://raw.githubusercontent.com/kazu0617/shapez-community-edition/v1.6.0/electron/favicon.png
+	sha256sums = SKIP
+	sha256sums = SKIP
+	sha256sums = SKIP
+	source_x86_64 = shapez-linux-x64-v1.6.0.tar.gz::https://github.com/kazu0617/shapez-community-edition/releases/download/v1.6.0/shapez-linux-x64-v1.6.0.tar.gz
+	sha256sums_x86_64 = SKIP
+	source_aarch64 = shapez-linux-arm64-v1.6.0.tar.gz::https://github.com/kazu0617/shapez-community-edition/releases/download/v1.6.0/shapez-linux-arm64-v1.6.0.tar.gz
+	sha256sums_aarch64 = SKIP
+
+pkgname = shapez-community-edition-bin

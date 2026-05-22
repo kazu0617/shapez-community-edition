@@ -1,0 +1,150 @@
+name: Release
+
+on:
+    push:
+        tags:
+            - 'v*.*.*'
+
+permissions:
+    contents: write
+
+jobs:
+    build:
+        name: Build ${{ matrix.platform }}-${{ matrix.arch }}
+        runs-on: ${{ matrix.os }}
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - os: ubuntu-latest
+                      platform: linux
+                      arch: x64
+                    - os: ubuntu-latest
+                      platform: linux
+                      arch: arm64
+                    - os: windows-latest
+                      platform: win32
+                      arch: x64
+                    - os: windows-latest
+                      platform: win32
+                      arch: arm64
+                    - os: macos-13
+                      platform: darwin
+                      arch: x64
+                    - os: macos-latest
+                      platform: darwin
+                      arch: arm64
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '22'
+                  cache: 'npm'
+
+            - name: Setup Java
+              uses: actions/setup-java@v4
+              with:
+                  distribution: 'temurin'
+                  java-version: '21'
+
+            - name: Install ffmpeg (Linux)
+              if: matrix.platform == 'linux'
+              run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+            - name: Install ffmpeg (macOS)
+              if: matrix.platform == 'darwin'
+              run: brew install ffmpeg
+
+            - name: Install ffmpeg (Windows)
+              if: matrix.platform == 'win32'
+              uses: FedericoCarboni/setup-ffmpeg@v3
+
+            - name: Install Node dependencies
+              run: npm ci
+
+            - name: Build ${{ matrix.platform }}-${{ matrix.arch }}
+              run: npm run package-${{ matrix.platform }}-${{ matrix.arch }}
+
+            - name: Create archive (Linux / macOS)
+              if: matrix.platform != 'win32'
+              shell: bash
+              run: |
+                  cd build_output/standalone
+                  tar -czf shapez-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.ref_name }}.tar.gz \
+                      shapez-${{ matrix.platform }}-${{ matrix.arch }}
+
+            - name: Create archive (Windows)
+              if: matrix.platform == 'win32'
+              shell: pwsh
+              run: |
+                  cd build_output/standalone
+                  Compress-Archive `
+                      -Path "shapez-${{ matrix.platform }}-${{ matrix.arch }}" `
+                      -DestinationPath "shapez-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.ref_name }}.zip"
+
+            - name: Upload artifact (Linux / macOS)
+              if: matrix.platform != 'win32'
+              uses: actions/upload-artifact@v4
+              with:
+                  name: shapez-${{ matrix.platform }}-${{ matrix.arch }}
+                  path: build_output/standalone/shapez-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.ref_name }}.tar.gz
+
+            - name: Upload artifact (Windows)
+              if: matrix.platform == 'win32'
+              uses: actions/upload-artifact@v4
+              with:
+                  name: shapez-${{ matrix.platform }}-${{ matrix.arch }}
+                  path: build_output/standalone/shapez-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.ref_name }}.zip
+
+    release:
+        name: Create GitHub Release
+        needs: build
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Download all artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  path: artifacts
+                  merge-multiple: true
+
+            - name: Create Release
+              uses: softprops/action-gh-release@v2
+              with:
+                  files: artifacts/*
+                  draft: false
+                  prerelease: ${{ contains(github.ref_name, '-') }}
+                  generate_release_notes: true
+                  body: |
+                      ## shapez Community Edition ${{ github.ref_name }}
+
+                      ### インストール方法
+
+                      #### Arch Linux (AUR)
+                      ```bash
+                      # yay を使う場合 (ソースビルド)
+                      yay -S shapez-community-edition
+
+                      # バイナリパッケージ
+                      yay -S shapez-community-edition-bin
+                      ```
+
+                      #### その他の Linux
+                      1. お使いのアーキテクチャの `.tar.gz` をダウンロード
+                      2. 任意の場所に展開
+                      3. `shapezio` を実行
+
+                      #### Windows
+                      1. `.zip` をダウンロードして展開
+                      2. `shapezio.exe` を実行
+
+                      #### macOS
+                      1. `.tar.gz` をダウンロードして展開
+                      2. `shapez.app` を Applications に移動して実行

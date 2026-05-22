@@ -1,0 +1,66 @@
+# Maintainer: kazu0617 <kazuyagi19990617@gmail.com>
+pkgname=shapez-community-edition
+pkgver=1.6.0
+pkgrel=1
+pkgdesc="Community-maintained fork of shapez.io, an open-source factory-building game"
+arch=('x86_64' 'aarch64')
+url="https://github.com/kazu0617/shapez-community-edition"
+license=('GPL-3.0-or-later')
+depends=('gtk3' 'nss' 'alsa-lib' 'libxtst' 'libxss' 'hicolor-icon-theme')
+makedepends=('nodejs' 'npm' 'java-runtime' 'ffmpeg' 'git')
+source=(
+    "${pkgname}-${pkgver}.tar.gz::https://github.com/kazu0617/shapez-community-edition/archive/refs/tags/v${pkgver}.tar.gz"
+    "${pkgname}.desktop"
+    "${pkgname}.sh"
+)
+sha256sums=(
+    'SKIP'
+    'SKIP'
+    'SKIP'
+)
+
+build() {
+    cd "shapez-community-edition-${pkgver}"
+
+    export npm_config_cache="${srcdir}/npm-cache"
+    npm ci
+
+    case "${CARCH}" in
+        x86_64)  npm run package-linux-x64 ;;
+        aarch64) npm run package-linux-arm64 ;;
+    esac
+}
+
+package() {
+    cd "shapez-community-edition-${pkgver}"
+
+    local _arch
+    case "${CARCH}" in
+        x86_64)  _arch="x64" ;;
+        aarch64) _arch="arm64" ;;
+    esac
+
+    # Install application files
+    install -dm755 "${pkgdir}/opt/${pkgname}"
+    cp -r "build_output/standalone/shapez-linux-${_arch}/." "${pkgdir}/opt/${pkgname}/"
+
+    # Fix permissions
+    find "${pkgdir}/opt/${pkgname}" -type f -exec chmod a-s {} \;
+    chmod 755 "${pkgdir}/opt/${pkgname}/shapezio"
+
+    # Install launcher script
+    install -Dm755 "../${pkgname}.sh" "${pkgdir}/usr/bin/${pkgname}"
+
+    # Install desktop entry
+    install -Dm644 "../${pkgname}.desktop" \
+        "${pkgdir}/usr/share/applications/${pkgname}.desktop"
+
+    # Install icon
+    install -Dm644 "electron/favicon.png" \
+        "${pkgdir}/usr/share/icons/hicolor/256x256/apps/${pkgname}.png"
+    install -Dm644 "electron/favicon.png" \
+        "${pkgdir}/usr/share/pixmaps/${pkgname}.png"
+
+    # License
+    install -Dm644 "LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
