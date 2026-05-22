@@ -37,8 +37,8 @@ jobs:
               with:
                   pkgname: shapez-community-edition
                   pkgbuild: ./aur/shapez-community-edition/PKGBUILD
-                  commit_username: kazu0617
-                  commit_email: kazuyagi19990617@gmail.com
+                  commit_username: ${{ vars.AUR_COMMIT_USERNAME }}
+                  commit_email: ${{ vars.AUR_COMMIT_EMAIL }}
                   ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
                   commit_message: "upgpkg: shapez-community-edition ${{ github.event.release.tag_name }}"
                   allow_empty_commits: false
@@ -111,8 +111,8 @@ jobs:
               with:
                   pkgname: shapez-community-edition-bin
                   pkgbuild: ./aur/shapez-community-edition-bin/PKGBUILD
-                  commit_username: kazu0617
-                  commit_email: kazuyagi19990617@gmail.com
+                  commit_username: ${{ vars.AUR_COMMIT_USERNAME }}
+                  commit_email: ${{ vars.AUR_COMMIT_EMAIL }}
                   ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
                   commit_message: "upgpkg: shapez-community-edition-bin ${{ github.event.release.tag_name }}"
                   allow_empty_commits: false
